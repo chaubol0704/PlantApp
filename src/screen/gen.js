@@ -1,0 +1,152 @@
+import React, { useEffect, useState } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  FlatList,
+  ScrollView,
+  TouchableOpacity,
+  useWindowDimensions,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import SearchBar from "../component/search";
+
+import axios from "axios";
+import Item from "../component/item";
+
+const GenScreen = ({ route }) => {
+  const id = route.params.id;
+  const { width } = useWindowDimensions();
+  const navigation = useNavigation();
+  const [species, setSpecies] = useState([]);
+
+  useEffect(() => {
+    try {
+      const url = `http://10.2.60.87:5000/api/species/all/${id}?page=1`;
+
+      axios({
+        method: "GET",
+        url,
+      })
+        .then((res) => setSpecies(res.data.respone.rows))
+        .catch((err) => console.log(err));
+    } catch (error) {
+      console.error("Error fetching species:", error);
+    }
+  }, []);
+  // (species.length > 0) & console.log(species);
+  return (
+    <View style={{ flex: 1, backgroundColor: "white" }}>
+      <View
+        style={{
+          backgroundColor: "#FFFFFF",
+          paddingHorizontal: 10,
+          paddingVertical: 10,
+          marginTop: 30,
+        }}
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            maxWidth: width * 0.9,
+            marginLeft: "auto",
+            marginRight: "auto",
+          }}
+        >
+          <TouchableOpacity
+            onPress={() => navigation.navigate("Home")}
+            style={{ width: width * 0.2 }}
+          >
+            <Image
+              source={{
+                uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSKIcGZXmQlfWB-dT25pYaCPyHG9eeW3oclfQ&usqp=CAU",
+              }}
+              style={{
+                width: width * 0.2,
+                height: width * 0.3,
+                resizeMode: "contain",
+                borderRadius: 20,
+              }}
+            />
+          </TouchableOpacity>
+          <View style={{ width: width * 0.7, paddingHorizontal: 4 }}>
+            <Text
+              style={{
+                textAlign: "center",
+                fontSize: 20,
+                fontWeight: "bold",
+                color: "#00FF00",
+                textShadowColor: "rgba(0, 0, 0, 0.5)",
+                textShadowOffset: { width: 2, height: 2 },
+                textShadowRadius: 5,
+              }}
+            >
+              NGÂN HÀNG THÔNG TIN GIỐNG CÂY TRỒNG VÀ VẬT NUÔI
+            </Text>
+          </View>
+        </View>
+      </View>
+      <View style={{ marginBottom: 15, marginRight: 4 }}>
+        <SearchBar />
+      </View>
+      {species.length > 0 && (
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <View style={styles.container}>
+            <View style={styles.contentWidget}>
+              <View style={styles.underline}></View>
+              <Text style={styles.heading}>CƠ SỞ DỮ LIỆU NGUỒN GEN</Text>
+            </View>
+          </View>
+
+          <View style={styles.grid}>
+            {species?.length > 0 &&
+              species?.map((item) => (
+                <View key={item?.id} style={styles.item}>
+                  <Item item={item} />
+                </View>
+              ))}
+          </View>
+        </ScrollView>
+      )}
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+  },
+  contentWidget: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  underline: {
+    width: 2.5,
+    height: 20,
+    backgroundColor: "#FFD700", // Màu tương đương với bg-yellow-500
+    marginRight: 2,
+  },
+  heading: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#3333", // Màu tương đương với text-lime-800
+  },
+  scrollContainer: {
+    flexGrow: 1,
+  },
+  grid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    margin: 5,
+  },
+  item: {
+    width: "48%", // Điều chỉnh chiều rộng của mỗi item tùy thuộc vào nhu cầu
+    marginBottom: 10,
+  },
+});
+export default GenScreen;
